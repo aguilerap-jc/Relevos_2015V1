@@ -1,1 +1,0 @@
-/home/aguilerapjc/JC/NAO/naoWS/relevos/build-naoqi64/CMakeFiles/relevos.dir
