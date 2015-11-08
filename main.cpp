@@ -35,31 +35,26 @@ using namespace std;
 using namespace AL;
 using namespace cv;
 
-AL::ALValue walk();
-
 int main(int argc, char *argv[]) {
     const int port = 9559;
     string ip = argv[1];        // NAO ip
     cout << "IP: " << ip << endl;
 
-    //AL::ALRobotPostureProxy posture(ip, port);  // Posture Proxy
-    //AL::ALMotionProxy motion(ip, port);         // Motion Proxy
+    bool LOCAL = false;         // Flap for the kind of execution (local or remote).
+    bool NAO = true;
+    bool start = false;
+    char key = 'x';
+    double angleToBlackLine;    // Angle of the detected line.
+
     Mat src;
     Mat imgOriginal;
-    bool DEBUG = true;          // Bandera para mostrar mensajes
-    bool LOCAL = false;         // Bandera para el tipo de ejecucion (local o remota)
-    bool NAO = true;
-    char key = 'x';
-    double angleToBlackLine;         // Angulo de la línea detectada
-
     NaoVision naoVision(ip, port, LOCAL);
     NaoMovement naoMovement(ip, port, LOCAL);
     VideoCapture cap(1);        // Class for video capturing from video files or cameras.
 
-    bool start = false;
     naoMovement.initialPositionRelay();
 
-    while (!start) { //esperando a la activacion de mi funcion
+    while (!start) {
         imgOriginal = naoVision.getImageTop();
         start = naoVision.filtroColor(imgOriginal);
 

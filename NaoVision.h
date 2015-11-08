@@ -16,6 +16,7 @@ using namespace cv;
 class NaoVision {
 public:
     NaoVision(const string ip, const int port, bool local);
+    Mat getImage();
     Mat getImageTop();
     Mat getImageBot();
     double calculateAngleToBlackLine();
@@ -26,14 +27,6 @@ public:
     Mat getSourceMat();
 
 private:
-
-    int iLowH;
-    int iHighH;
-    int iLowS;
-    int iHighS;
-    int iLowV;
-    int iHighV;
-
     RNG rng;
     Mat src;
     Mat src_gray;
@@ -52,6 +45,14 @@ private:
     string ip;
     string clientName;
     string parameterClientName;
+
+    // Variables that allow us to detect different colors.
+    int iLowH;
+    int iHighH;
+    int iLowS;
+    int iHighS;
+    int iLowV;
+    int iHighV;
 
     double getAngleDegrees(const vector<Point> &pts, Mat &img);
     void drawAxis(Mat& img, Point p, Point q, Scalar colour, const float scale);
