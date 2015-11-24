@@ -15,6 +15,7 @@ public:
     void initialPositionIndividualRace();
     void initialPositionRelayRace();
     void moveInIndividualRace(double angleInDegrees);
+    void moveInRelayRace(double angleInDegrees);
     void naoOnGoal();
     void stop();
 
@@ -29,5 +30,7 @@ private:
 
     double linearVelocity(double theta);
     double angularVelocity(double theta);
+    double linearVelocityRelayRace(double theta);
+    double angularVelocityRelayRace(double theta);
     AL::ALValue walkParameters();
 };

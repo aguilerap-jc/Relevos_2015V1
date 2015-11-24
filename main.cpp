@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
             finish = true;
         } else {
             angleToBlackLine = naoVision.calculateAngleToBlackLine();
-            naoMovement.moveInIndividualRace(angleToBlackLine);
+            naoMovement.moveInRelayRace(angleToBlackLine);
         }
 
         key = waitKey(10);

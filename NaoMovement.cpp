@@ -39,6 +39,30 @@ void NaoMovement::moveInIndividualRace(double angleInDegrees) {
     motion.move(linearVelocity(angleInDegrees), 0, angularVelocity(angleInDegrees),walkParameters());
 
     if (!local){
+        cout << ((naoPositionOnLane == CENTER )? "CENTER" : naoPositionOnLane == RIGHT ? "RIGHT" : "LEFT") << endl;
+        cout << "VelLin: " << linearVelocity(angleInDegrees) << endl;
+        cout << "VelAng: " << angularVelocity(angleInDegrees) << endl;
+        cout << "Theta: " << angleInDegrees << endl;
+        cout << "--------------------------------" << endl;
+    }
+}
+
+// Given an angle in degrees, move the NAO to the right side.
+void NaoMovement::moveInRelayRace(double angleInDegrees) {
+    if (angleInDegrees == 90) {
+        naoPositionOnLane = CENTER;
+        angleInDegrees = 120;
+    } else if (angleInDegrees < 90) {
+        naoPositionOnLane = RIGHT;       // Nao is on the right side.
+    } else if (angleInDegrees > 90) {
+        naoPositionOnLane = LEFT;        // Nao is on the left side.
+        angleInDegrees = 140;
+    }
+
+    motion.move(linearVelocityRelayRace(angleInDegrees), 0, angularVelocityRelayRace(angleInDegrees),walkParameters());
+
+    if (!local){
+        cout << ((naoPositionOnLane == CENTER )? "CENTER" : naoPositionOnLane == RIGHT ? "RIGHT" : "LEFT") << endl;
         cout << "VelLin: " << linearVelocity(angleInDegrees) << endl;
         cout << "VelAng: " << angularVelocity(angleInDegrees) << endl;
         cout << "Theta: " << angleInDegrees << endl;
@@ -80,12 +104,36 @@ double NaoMovement::linearVelocity(double theta){
 
 // w = wmax * ( 1 - e^(-k*abs(theta - 90)))*N if (theta > 90) (N = -1) else (N = 1)
 double NaoMovement::angularVelocity(double theta){
-    double wMax = 0.25;
+    double wMax = 0.30;
     const double k1 = 1.0 / 10;     // k1 right to left correction
     const double k2 = 1.0 / 10;     // k2 left to right correction
 
     if ((naoPositionOnLane == RIGHT && theta >= 70 && theta <= 90) || (naoPositionOnLane == LEFT && theta >= 90 && theta <= 110))
-        wMax = 0.45;
+        wMax = 0.50; // 45
+
+    return pow(-1, theta > 90) * (wMax * (1 - exp(-(theta > 90 ? k2 : k1) * abs(theta - 90))));
+}
+
+// v = vmax * e^(-k*abs(theta - 90))
+double NaoMovement::linearVelocityRelayRace(double theta){
+    double vMax = 0.85;
+    const double k1 = 1.0 / 40;     // k1 linear velocity for the right side.
+    const double k2 = 1.0 / 20;     // k2 linear velocity for the left side. // 1/20
+
+    if ((naoPositionOnLane == RIGHT && theta >= 70 && theta <= 90) || (naoPositionOnLane == LEFT && theta >= 90 && theta <= 110))
+        vMax = 0.65;
+
+    return vMax * exp(-(theta > 90 ? k2 : k1) * abs(theta - 90));
+}
+
+// w = wmax * ( 1 - e^(-k*abs(theta - 90)))*N if (theta > 90) (N = -1) else (N = 1)
+double NaoMovement::angularVelocityRelayRace(double theta){
+    double wMax = 0.30;
+    const double k1 = 1.0 / 7;     // k1 right to left correction
+    const double k2 = 1.0 / 7;     // k2 left to right correction
+
+    if ((naoPositionOnLane == RIGHT && theta >= 70 && theta <= 90) || (naoPositionOnLane == LEFT && theta >= 90 && theta <= 110))
+        wMax = 0.50;
 
     return pow(-1, theta > 90) * (wMax * (1 - exp(-(theta > 90 ? k2 : k1) * abs(theta - 90))));
 }
