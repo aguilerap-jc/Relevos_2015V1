@@ -17,6 +17,7 @@ public:
     void moveInIndividualRace(double angleInDegrees);
     void moveInRelayRace(double angleInDegrees);
     void naoOnGoal();
+    void naoOnGoalRelayRace(double angleInDegrees);
     void stop();
 
 private:
@@ -28,11 +29,11 @@ private:
     int port;
     string ip;
 
-    double linearVelocity(double theta);
-    double angularVelocity(double theta);
+    double linearVelocityIndividualRace(double theta);
+    double angularVelocityIndividualRace(double theta);
     double lateralVelocity(double theta);
     double linearVelocityRelayRace(double theta);
     double angularVelocityRelayRace(double theta);
-    AL::ALValue walkParameters();
-    AL::ALValue walkParametersRelayRace();
+    AL::ALValue walkingParametersIndividualRace();
+    AL::ALValue walkingParametersRelayRace();
 };

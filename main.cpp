@@ -61,8 +61,8 @@ int main(int argc, char *argv[]) {
             naoVision.setSourceMat(src);
         }
 
-        if (naoVision.naoIsNearTheGoal(src)) {
-            naoMovement.naoOnGoal();
+        if (naoVision.naoIsNearTheGoalRelayRace(src)) {
+            naoMovement.naoOnGoalRelayRace(angleToBlackLine);
             finish = true;
         } else {
             angleToBlackLine = naoVision.calculateAngleToBlackLine();

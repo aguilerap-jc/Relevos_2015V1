@@ -177,7 +177,23 @@ double NaoVision::calculateAngleToBlackLine() {
 bool NaoVision::naoIsNearTheGoal(Mat originalImage) {
     getAreaRedColor(originalImage);
 
+    if (!local)
+        cout << "Red black: " << areaColorDetection << endl;
+
     if (areaColorDetection > 30)
+        return true;
+    else
+        return false;
+}
+
+// Detect if the NAO is near the goal.
+bool NaoVision::naoIsNearTheGoalRelayRace(Mat originalImage) {
+    getAreaBlackColor(originalImage);
+
+    if (!local)
+        cout << "Area black: " << areaColorDetection << endl;
+
+    if (areaColorDetection > 10)
         return true;
     else
         return false;

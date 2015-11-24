@@ -21,6 +21,7 @@ public:
     Mat getImageFrom(NaoCamera camera);
     double calculateAngleToBlackLine();
     bool naoIsNearTheGoal(Mat originalImage);
+    bool naoIsNearTheGoalRelayRace(Mat originalImage);
     int getAreaBlackColor(Mat originalImage);
     int getAreaRedColor(Mat originalImage);
     int getAreaYellowColor(Mat originalImage);
