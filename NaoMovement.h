@@ -30,7 +30,9 @@ private:
 
     double linearVelocity(double theta);
     double angularVelocity(double theta);
+    double lateralVelocity(double theta);
     double linearVelocityRelayRace(double theta);
     double angularVelocityRelayRace(double theta);
     AL::ALValue walkParameters();
+    AL::ALValue walkParametersRelayRace();
 };

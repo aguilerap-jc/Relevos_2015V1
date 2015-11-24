@@ -51,15 +51,18 @@ void NaoMovement::moveInIndividualRace(double angleInDegrees) {
 void NaoMovement::moveInRelayRace(double angleInDegrees) {
     if (angleInDegrees == 90) {
         naoPositionOnLane = CENTER;
-        angleInDegrees = 120;
+        angleInDegrees = 115;
+        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkParametersRelayRace());
     } else if (angleInDegrees < 90) {
         naoPositionOnLane = RIGHT;       // Nao is on the right side.
+        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkParametersRelayRace());
     } else if (angleInDegrees > 90) {
         naoPositionOnLane = LEFT;        // Nao is on the left side.
-        angleInDegrees = 140;
+        angleInDegrees = 120;
+        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), angularVelocityRelayRace(angleInDegrees), walkParametersRelayRace());
     }
 
-    motion.move(linearVelocityRelayRace(angleInDegrees), 0, angularVelocityRelayRace(angleInDegrees),walkParameters());
+    //motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0,walkParametersRelayRace());
 
     if (!local){
         cout << ((naoPositionOnLane == CENTER )? "CENTER" : naoPositionOnLane == RIGHT ? "RIGHT" : "LEFT") << endl;
@@ -114,6 +117,15 @@ double NaoMovement::angularVelocity(double theta){
     return pow(-1, theta > 90) * (wMax * (1 - exp(-(theta > 90 ? k2 : k1) * abs(theta - 90))));
 }
 
+// Vy = vMax * N * ( 1 - e^(-k*abs(theta - 90))), if (deltaCenter < 0) (N = -1) else (N = 1)
+double NaoMovement::lateralVelocity(double theta) {
+    const double vLateralMax = 0.15;
+    const double k1 = 1.0 / 35;     // k1 right to left correction 1 / 20
+    const double k2 = 1.0 / 35;     // k2 left to right correction
+
+    return pow(-1, theta > 90) * (vLateralMax * (1 - exp(-(theta > 90 ? k2 : k1) * abs(theta - 90))));
+}
+
 // v = vmax * e^(-k*abs(theta - 90))
 double NaoMovement::linearVelocityRelayRace(double theta){
     double vMax = 0.85;
@@ -129,8 +141,8 @@ double NaoMovement::linearVelocityRelayRace(double theta){
 // w = wmax * ( 1 - e^(-k*abs(theta - 90)))*N if (theta > 90) (N = -1) else (N = 1)
 double NaoMovement::angularVelocityRelayRace(double theta){
     double wMax = 0.30;
-    const double k1 = 1.0 / 7;     // k1 right to left correction
-    const double k2 = 1.0 / 7;     // k2 left to right correction
+    const double k1 = 1.0 / 10;     // k1 right to left correction
+    const double k2 = 1.0 / 10;     // k2 left to right correction
 
     if ((naoPositionOnLane == RIGHT && theta >= 70 && theta <= 90) || (naoPositionOnLane == LEFT && theta >= 90 && theta <= 110))
         wMax = 0.50;
@@ -142,6 +154,14 @@ double NaoMovement::angularVelocityRelayRace(double theta){
 AL::ALValue NaoMovement::walkParameters() {
    return  AL::ALValue::array(AL::ALValue::array("MaxStepX",0.08),AL::ALValue::array("MaxStepY",0.14),
                               AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency",0.5), //Frec 0.5
+                              AL::ALValue::array("StepHeight",0.04),AL::ALValue::array("TorsoWx",0.0),
+                              AL::ALValue::array("TorsoWy",0));
+}
+
+// Enhance the walking parameters to increase the speed.
+AL::ALValue NaoMovement::walkParametersRelayRace() {
+   return  AL::ALValue::array(AL::ALValue::array("MaxStepX",0.08),AL::ALValue::array("MaxStepY",0.14),
+                              AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency",0.2), //Frec 0.5
                               AL::ALValue::array("StepHeight",0.04),AL::ALValue::array("TorsoWx",0.0),
                               AL::ALValue::array("TorsoWy",0));
 }
