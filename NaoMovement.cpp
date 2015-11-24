@@ -10,7 +10,7 @@ NaoMovement::NaoMovement(const string ip, const int port, bool local): posture(i
 }
 
 // Establish the position in Crouch and then in StandInit.
-void NaoMovement::initialPosition() {
+void NaoMovement::initialPositionIndividualRace() {
     posture.goToPosture("Crouch", 0.5);
     posture.goToPosture("StandInit", 1.0);
 
@@ -18,10 +18,9 @@ void NaoMovement::initialPosition() {
         cout << "Stand" << endl;
 }
 
-void NaoMovement::initialPositionRelay() {
+void NaoMovement::initialPositionRelayRace() {
     posture.goToPosture("Crouch", 0.5);
     motion.angleInterpolation("HeadYaw", -2.0f, 1.0f, true);
-    //posture.goToPosture("StandInit", 0.5);
 
     if (!local)
         cout << "Stand" << endl;
@@ -45,6 +44,14 @@ void NaoMovement::moveInIndividualRace(double angleInDegrees) {
         cout << "Theta: " << angleInDegrees << endl;
         cout << "--------------------------------" << endl;
     }
+}
+
+// Takes the NAO to a position just before the goal.
+void NaoMovement::naoOnGoal() {
+    if (!local)
+        cout << "Nao on goal!" << endl;
+
+    motion.moveTo(0.6, 0, 0, walkParameters());
 }
 
 // Establish the position in Crouch and set Stiffnesses to body.
@@ -78,7 +85,7 @@ double NaoMovement::angularVelocity(double theta){
     const double k2 = 1.0 / 10;     // k2 left to right correction
 
     if ((naoPositionOnLane == RIGHT && theta >= 70 && theta <= 90) || (naoPositionOnLane == LEFT && theta >= 90 && theta <= 110))
-        wMax = 0.35;
+        wMax = 0.45;
 
     return pow(-1, theta > 90) * (wMax * (1 - exp(-(theta > 90 ? k2 : k1) * abs(theta - 90))));
 }

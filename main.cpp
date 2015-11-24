@@ -42,40 +42,33 @@ int main(int argc, char *argv[]) {
 
     bool LOCAL = false;         // Flap for the kind of execution (local or remote).
     bool NAO = true;
-    bool start = false;
+    bool finish = false;
     char key = 'x';
     double angleToBlackLine;    // Angle of the detected line.
 
     Mat src;
-    Mat imgOriginal;
     NaoVision naoVision(ip, port, LOCAL);
     NaoMovement naoMovement(ip, port, LOCAL);
     VideoCapture cap(1);        // Class for video capturing from video files or cameras.
 
-    naoMovement.initialPositionRelay();
+    naoMovement.initialPositionIndividualRace();
 
-    while (!start) {
-        imgOriginal = naoVision.getImageTop();
-        start = naoVision.filtroColor(imgOriginal);
-
-        key = waitKey(10);
-    }
-
-    naoVision.unsubscribe();
-    naoMovement.stop();
-
-    /*
-    //Inicializacion normal
-    while (key != 27) {
+    while (key != 27 && !finish) {
         if (NAO) {
-            src = naoVision.getImage();
+            src = naoVision.getImageFrom(NaoVision::BOTTOM_CAMERA);
         } else {
             cap >> src;
             naoVision.setSourceMat(src);
         }
 
-        angleToBlackLine = naoVision.calculateAngleToBlackLine();
-        naoMovement.moveInIndividualRace(angleToBlackLine);
+        if (naoVision.naoIsNearTheGoal(src)) {
+            naoMovement.naoOnGoal();
+            finish = true;
+        } else {
+            angleToBlackLine = naoVision.calculateAngleToBlackLine();
+            naoMovement.moveInIndividualRace(angleToBlackLine);
+        }
+
         key = waitKey(10);
 
         for (int i = 0; i < 250000; i++);   // Delay.
@@ -83,6 +76,6 @@ int main(int argc, char *argv[]) {
 
     naoVision.unsubscribe();
     naoMovement.stop();
-    */
+
     return 0;
 }
