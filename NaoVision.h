@@ -17,19 +17,25 @@ class NaoVision {
 public:
     enum NaoCamera {TOP_CAMERA, BOTTOM_CAMERA};
 
+    //Initial and ending Functions
     NaoVision(const string ip, const int port, bool local);
     Mat getImageFrom(NaoCamera camera);
     double calculateAngleToBlackLine();
+    void unsubscribe();
+    void setSourceMat(Mat source);
+    Mat getSourceMat();
+
+    // Color Filters
     bool naoIsNearTheGoal(Mat originalImage);
     bool naoIsNearTheGoalRelayRace(Mat originalImage);
     int getAreaBlackColor(Mat originalImage);
     int getAreaRedColor(Mat originalImage);
     int getAreaYellowColor(Mat originalImage);
-    void colorFilter(Mat originalImage);
+    double FinalLineFilterRelayRace(Mat originalImage);
+    void ColorFilter(Mat originalImage);
+
+    //Calibration
     void calibrateColorDetection();
-    void unsubscribe();
-    void setSourceMat(Mat source);
-    Mat getSourceMat();
 
 private:
     RNG rng;

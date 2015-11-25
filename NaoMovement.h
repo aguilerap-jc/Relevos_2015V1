@@ -15,9 +15,14 @@ public:
     void initialPositionIndividualRace();
     void initialPositionRelayRace();
     void moveInIndividualRace(double angleInDegrees);
+
     void moveInRelayRace(double angleInDegrees);
     void naoOnGoal();
     bool naoOnGoalRelayRace(double angleInDegrees);
+
+    void middleZoneRelayRace();
+    void rightCorrection();
+
     void stop();
 
 private:

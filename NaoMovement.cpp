@@ -46,8 +46,30 @@ void NaoMovement::moveInIndividualRace(double angleInDegrees) {
     }
 }
 
+void NaoMovement::rightCorrection(){
+    motion.moveTo(0,-0.2,0,walkingParametersOnGoalRelayRace());
+/*
+    if (angleInDegrees == 90) {
+        naoPositionOnLane = CENTER;
+        angleInDegrees = 115;
+    } else if (angleInDegrees < 90) {
+        naoPositionOnLane = RIGHT;       // Nao is on the right side.
+    } else if (angleInDegrees > 90) {
+        naoPositionOnLane = LEFT;        // Nao is on the left side.
+        angleInDegrees = 135;
+    }
+    motion.move(linearVelocity(angleInDegrees),0, angularVelocity(angleInDegrees),walkParameters());
+*/
+}
+
+void NaoMovement::middleZoneRelayRace(){
+    motion.moveTo(0.005, 0.0 , 0, walkingParametersOnGoalRelayRace());
+}
+
+
 // Given an angle in degrees, move the NAO to the right side.
 void NaoMovement::moveInRelayRace(double angleInDegrees) {
+
     if (angleInDegrees == 90) {
         naoPositionOnLane = CENTER;
         angleInDegrees = 115;
@@ -95,9 +117,10 @@ bool NaoMovement::naoOnGoalRelayRace(double angleInDegrees) {
     } else
         //cout << "NOT FINISH" << endl;
         motion.move(0.5 * linearVelocityRelayRace(angleInDegrees), 0, 0, walkingParametersOnGoalRelayRace());
-
     return false;
 }
+
+
 
 // Establish the position in Crouch and set Stiffnesses to body.
 void NaoMovement::stop() {
@@ -152,7 +175,7 @@ double NaoMovement::linearVelocityRelayRace(double theta){
 double NaoMovement::angularVelocityRelayRace(double theta){
     double wMax = 0.30;
     const double k1 = 1.0 / 10;     // k1 right to left correction
-    const double k2 = 1.0 / 10;     // k2 left to right correction
+    const double k2 = 1.0 / 10;     // k2 left to
 
     if ((naoPositionOnLane == RIGHT && theta >= 70 && theta <= 90) || (naoPositionOnLane == LEFT && theta >= 90 && theta <= 110))
         wMax = 0.50;
@@ -183,7 +206,7 @@ AL::ALValue NaoMovement::walkingParametersIndividualRace() {
 // Enhance the walking parameters to increase the speed.
 AL::ALValue NaoMovement::walkingParametersRelayRace() {
    return  AL::ALValue::array(AL::ALValue::array("MaxStepX",0.08),AL::ALValue::array("MaxStepY",0.13),
-                              AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency", 0.4), //Frec 0.5
+                              AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency", 0.3), //Frec 0.5
                               AL::ALValue::array("StepHeight",0.04),AL::ALValue::array("TorsoWx",0.0),
                               AL::ALValue::array("TorsoWy",0));
 }

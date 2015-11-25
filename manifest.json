@@ -1,0 +1,15 @@
+{
+    "name": "com.ubuntu.developer.username.relevos",
+    "description": "description of relevos",
+    "framework": "ubuntu-sdk-14.04-qml",
+    "architecture": "all",
+    "title": "relevos",
+    "hooks": {
+        "relevos": {
+            "apparmor": "relevos.json",
+            "desktop": "relevos.desktop"
+        }
+    },
+    "version": "0.1",
+    "maintainer": ""
+}
