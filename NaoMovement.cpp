@@ -51,14 +51,17 @@ void NaoMovement::moveInRelayRace(double angleInDegrees) {
     if (angleInDegrees == 90) {
         naoPositionOnLane = CENTER;
         angleInDegrees = 115;
+        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkingParametersRelayRace());
     } else if (angleInDegrees < 90) {
         naoPositionOnLane = RIGHT;       // Nao is on the right side.
+        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkingParametersRelayRace());
     } else if (angleInDegrees > 90) {
         naoPositionOnLane = LEFT;        // Nao is on the left side.
         angleInDegrees = 120;
+        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), angularVelocityRelayRace(angleInDegrees), walkingParametersRelayRace());
     }
 
-    motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkingParametersRelayRace());
+    //motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkingParametersRelayRace());
 
     if (!local) {
         cout << "VelLin: " << linearVelocityRelayRace(angleInDegrees) << endl;
@@ -77,11 +80,23 @@ void NaoMovement::naoOnGoal() {
 }
 
 // Takes the NAO to a position just before the goal.
-void NaoMovement::naoOnGoalRelayRace(double angleInDegrees) {
-    if (!local)
+bool NaoMovement::naoOnGoalRelayRace(double angleInDegrees) {
+    if (!local) {
         cout << "Nao on goal relay race!" << endl;
+        cout << "Black area: " << angleInDegrees << endl;
+    }
 
-    motion.moveTo(0.35, 0, 0, walkingParametersRelayRace());
+    if (angleInDegrees >= 60) {
+        if (!local)
+            cout << "FINISH" << endl;
+
+        motion.moveTo(0.005, 0, 0, walkingParametersRelayRace());
+        return true;
+    } else
+        //cout << "NOT FINISH" << endl;
+        motion.move(0.5 * linearVelocityRelayRace(angleInDegrees), 0, 0, walkingParametersOnGoalRelayRace());
+
+    return false;
 }
 
 // Establish the position in Crouch and set Stiffnesses to body.
@@ -169,6 +184,14 @@ AL::ALValue NaoMovement::walkingParametersIndividualRace() {
 AL::ALValue NaoMovement::walkingParametersRelayRace() {
    return  AL::ALValue::array(AL::ALValue::array("MaxStepX",0.08),AL::ALValue::array("MaxStepY",0.13),
                               AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency", 0.4), //Frec 0.5
+                              AL::ALValue::array("StepHeight",0.04),AL::ALValue::array("TorsoWx",0.0),
+                              AL::ALValue::array("TorsoWy",0));
+}
+
+// Enhance the walking parameters to increase the speed.
+AL::ALValue NaoMovement::walkingParametersOnGoalRelayRace() {
+   return  AL::ALValue::array(AL::ALValue::array("MaxStepX",0.04),AL::ALValue::array("MaxStepY",0.13),
+                              AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency", 0.1), //Frec 0.5
                               AL::ALValue::array("StepHeight",0.04),AL::ALValue::array("TorsoWx",0.0),
                               AL::ALValue::array("TorsoWy",0));
 }

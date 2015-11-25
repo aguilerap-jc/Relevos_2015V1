@@ -62,8 +62,11 @@ int main(int argc, char *argv[]) {
         }
 
         if (naoVision.naoIsNearTheGoalRelayRace(src)) {
-            naoMovement.naoOnGoalRelayRace(angleToBlackLine);
-            finish = true;
+            //naoMovement.naoOnGoalRelayRace(angleToBlackLine);
+            //finish = true;
+            if (naoMovement.naoOnGoalRelayRace(naoVision.getAreaBlackColor(src)))
+                finish = true;
+
         } else {
             angleToBlackLine = naoVision.calculateAngleToBlackLine();
             naoMovement.moveInRelayRace(angleToBlackLine);

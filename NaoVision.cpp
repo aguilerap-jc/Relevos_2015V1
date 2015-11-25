@@ -193,7 +193,7 @@ bool NaoVision::naoIsNearTheGoalRelayRace(Mat originalImage) {
     if (!local)
         cout << "Area black: " << areaColorDetection << endl;
 
-    if (areaColorDetection > 10)
+    if (areaColorDetection >= 20)
         return true;
     else
         return false;
