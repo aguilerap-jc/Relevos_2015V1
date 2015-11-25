@@ -46,44 +46,32 @@ void NaoMovement::moveInIndividualRace(double angleInDegrees) {
     }
 }
 
-void NaoMovement::rightCorrection(){
-    motion.moveTo(0,-0.2,0,walkingParametersOnGoalRelayRace());
-/*
-    if (angleInDegrees == 90) {
-        naoPositionOnLane = CENTER;
-        angleInDegrees = 115;
-    } else if (angleInDegrees < 90) {
-        naoPositionOnLane = RIGHT;       // Nao is on the right side.
-    } else if (angleInDegrees > 90) {
-        naoPositionOnLane = LEFT;        // Nao is on the left side.
-        angleInDegrees = 135;
-    }
-    motion.move(linearVelocity(angleInDegrees),0, angularVelocity(angleInDegrees),walkParameters());
-*/
+void NaoMovement::leftCorrection(){
+    motion.moveTo(0.2,-0.20, 0,walkingParametersOnGoalRelayRace());
 }
 
-void NaoMovement::middleZoneRelayRace(){
-    motion.moveTo(0.005, 0.0 , 0, walkingParametersOnGoalRelayRace());
+void NaoMovement::middleCorrection(){
+    motion.moveTo(0.2, -0.10 , 0, walkingParametersOnGoalRelayRace());
+}
+
+void NaoMovement::rightCorrection() {
+    motion.moveTo(0.2, 0.0 , 0, walkingParametersOnGoalRelayRace());
 }
 
 
 // Given an angle in degrees, move the NAO to the right side.
 void NaoMovement::moveInRelayRace(double angleInDegrees) {
-
     if (angleInDegrees == 90) {
         naoPositionOnLane = CENTER;
         angleInDegrees = 115;
-        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkingParametersRelayRace());
     } else if (angleInDegrees < 90) {
         naoPositionOnLane = RIGHT;       // Nao is on the right side.
-        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkingParametersRelayRace());
     } else if (angleInDegrees > 90) {
         naoPositionOnLane = LEFT;        // Nao is on the left side.
         angleInDegrees = 120;
-        motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), angularVelocityRelayRace(angleInDegrees), walkingParametersRelayRace());
     }
 
-    //motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkingParametersRelayRace());
+    motion.move(linearVelocityRelayRace(angleInDegrees), lateralVelocity(angleInDegrees), 0, walkingParametersRelayRace());
 
     if (!local) {
         cout << "VelLin: " << linearVelocityRelayRace(angleInDegrees) << endl;
@@ -185,8 +173,8 @@ double NaoMovement::angularVelocityRelayRace(double theta){
 
 // Vy = vMax * N * ( 1 - e^(-k*abs(theta - 90))), if (deltaCenter < 0) (N = -1) else (N = 1)
 double NaoMovement::lateralVelocity(double theta) {
-    double vLateralMax = 0.05;
-    const double k1 = 1.0 / 65;     // k1 right to left correction 1
+    double vLateralMax = 0.1;
+    const double k1 = 1.0 / 45;     // k1 right to left correction 1
     const double k2 = 1.0 / 15;     // k2 left to right correction
 
     if (theta >= 115)
@@ -206,14 +194,14 @@ AL::ALValue NaoMovement::walkingParametersIndividualRace() {
 // Enhance the walking parameters to increase the speed.
 AL::ALValue NaoMovement::walkingParametersRelayRace() {
    return  AL::ALValue::array(AL::ALValue::array("MaxStepX",0.08),AL::ALValue::array("MaxStepY",0.13),
-                              AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency", 0.3), //Frec 0.5
+                              AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency", 0.1), //Frec 0.5
                               AL::ALValue::array("StepHeight",0.04),AL::ALValue::array("TorsoWx",0.0),
                               AL::ALValue::array("TorsoWy",0));
 }
 
 // Enhance the walking parameters to increase the speed.
 AL::ALValue NaoMovement::walkingParametersOnGoalRelayRace() {
-   return  AL::ALValue::array(AL::ALValue::array("MaxStepX",0.04),AL::ALValue::array("MaxStepY",0.13),
+   return  AL::ALValue::array(AL::ALValue::array("MaxStepX",0.04),AL::ALValue::array("MaxStepY",0.12),
                               AL::ALValue::array("MaxStepTheta",0.4),AL::ALValue::array("MaxStepFrequency", 0.1), //Frec 0.5
                               AL::ALValue::array("StepHeight",0.04),AL::ALValue::array("TorsoWx",0.0),
                               AL::ALValue::array("TorsoWy",0));

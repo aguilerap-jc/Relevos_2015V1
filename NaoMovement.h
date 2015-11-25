@@ -20,7 +20,8 @@ public:
     void naoOnGoal();
     bool naoOnGoalRelayRace(double angleInDegrees);
 
-    void middleZoneRelayRace();
+    void leftCorrection();
+    void middleCorrection();
     void rightCorrection();
 
     void stop();

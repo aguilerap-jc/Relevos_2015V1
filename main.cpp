@@ -46,7 +46,6 @@ int main(int argc, char *argv[]) {
     char key = 'x';
     double angleToBlackLine;    // Angle of the detected line.
     int yellowArea;
-    int redArea;
     int finalArea;
 
     Mat bottomImage, topImage;
@@ -65,8 +64,6 @@ int main(int argc, char *argv[]) {
             naoVision.setSourceMat(bottomImage);
         }
 
-
-
         if (naoVision.naoIsNearTheGoalRelayRace(bottomImage)) {
             topImage = naoVision.getImageFrom(NaoVision::TOP_CAMERA);
 
@@ -77,14 +74,17 @@ int main(int argc, char *argv[]) {
 
             if(yellowArea >=12 && yellowArea< 40){
                 cout<<"Finishing on left" << endl;
-                naoMovement.rightCorrection();
-                finish = true;
+                naoMovement.leftCorrection();
+            }
+            else if (yellowArea >= 2) {
+                cout<<"Finishing on middle" << endl;
+                naoMovement.middleCorrection();
             }
             else {
                 cout<<"Finishing on right" << endl;
-                naoMovement.middleZoneRelayRace();
-                finish = true;
+                naoMovement.rightCorrection();
             }
+            finish = true;
 
         } else {
             angleToBlackLine = naoVision.calculateAngleToBlackLine();
