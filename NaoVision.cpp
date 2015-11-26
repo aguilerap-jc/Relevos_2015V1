@@ -22,7 +22,7 @@
 NaoVision::NaoVision(const string ip, const int port, bool local): cameraProxy(ip, port), rng(12345) {
     iLowH = 0;
     iHighH = 77;
-    iLowS = 43;     // Este parametro es el primero que hay que mover en busca de la deteccion del verde.
+    iLowS = 43;
     iHighS = 229;
     iLowV = 0;
     iHighV = 255;
@@ -34,6 +34,22 @@ NaoVision::NaoVision(const string ip, const int port, bool local): cameraProxy(i
     this->local = local;
     this->parameterClientName = "test";
     this->clientName = cameraProxy.subscribe(parameterClientName, AL::kQVGA, AL::kBGRColorSpace, 30); // Subscribe to ALVideoDevice
+}
+
+NaoVision::NaoVision(bool local): rng(12345) {
+    iLowH = 0;
+    iHighH = 77;
+    iLowS = 43;     // Este parametro es el primero que hay que mover en busca de la deteccion del verde.
+    iHighS = 229;
+    iLowV = 0;
+    iHighV = 255;
+    thresh = 110;
+    umbral = 60;
+    areaColorDetection = 0;
+    this->local = local;
+    this->parameterClientName = "test";
+    this->clientName = cameraProxy.subscribe(parameterClientName, AL::kQVGA, AL::kBGRColorSpace, 30); // Subscribe to ALVideoDevice
+    
 }
 
 // Get image from NAO.
@@ -177,10 +193,71 @@ double NaoVision::calculateAngleToBlackLine() {
 bool NaoVision::naoIsNearTheGoal(Mat originalImage) {
     getAreaRedColor(originalImage);
 
-    if (areaColorDetection > 30)
+    if (!local)
+        cout << "Red Area :  " << areaColorDetection << endl;
+
+    if (areaColorDetection >= 30)
         return true;
     else
         return false;
+}
+
+// Detect if the NAO is near the goal.
+bool NaoVision::naoIsNearTheGoalRelayRace(Mat originalImage) {
+    double areaColorDetection = FinalLineFilterRelayRace(originalImage);
+
+    if (!local)
+        cout << "Black Area :  " << areaColorDetection << endl;
+
+    if (areaColorDetection >= 30)
+        return true;
+    else
+        return false;
+}
+
+double NaoVision::FinalLineFilterRelayRace(Mat originalImage){
+    int LowH = 0;
+    int HighH = 180;
+    int LowS = 0;
+    int HighS = 255;
+    int LowV = 100;
+    int HighV = 255;
+    double finalLine = 0;
+    Mat src_gray;
+    Mat imgHSV;
+    Mat imgThresholded;
+
+    cvtColor(originalImage, imgHSV, COLOR_BGR2HSV);       // Convert the captured frame from BGR to HSV.
+    inRange(imgHSV, Scalar(LowH, LowS, LowV), Scalar(HighH,HighS, HighV), imgThresholded); // Threshold the image.
+
+    // Morphological opening (remove small objects from the foreground).
+    erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+    dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
+    // Morphological closing (fill small holes in the foreground).
+    dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+    erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+    //drawContours(imgThresholded,contours,1,theObjects.at(i).getColor(),3,8,hierarchy);
+
+    // Get the moments.
+    Moments oMoments = moments(imgThresholded);
+
+    // Receive the centroid area.
+    double dArea = oMoments.m00;
+    finalLine = (dArea / 100000);
+
+    // Cloned the modified image to calculate the points.
+    src_gray = imgThresholded.clone();
+    if(!local){
+        imshow("FinalLineFilter", imgThresholded);      // Show the thresholded image.
+        imshow("Original", originalImage);                // Show the original image.
+    }
+    // Blur to soften the image points.
+    blur(src_gray, src_gray, Size(3,3));
+    //cout <<area << endl;
+    //if(area>=1 && area<=20)
+        //return true;    // Green area detected.
+    return (195-finalLine);
 }
 
 // Returns the area of black color captured of a certain image.
@@ -191,30 +268,34 @@ int NaoVision::getAreaBlackColor(Mat originalImage) {
     iHighS = 255;
     iLowV = 100;
     iHighV = 255;
+    ColorFilter(originalImage);
 
-    colorFilter(originalImage);
     areaColorDetection = 195 - areaColorDetection;
+    cout << areaColorDetection << endl;
+
     return areaColorDetection;
 }
 
 // Returns the area of red color captured of a certain image.
 int NaoVision::getAreaRedColor(Mat originalImage) {
 /*Parametros de Cinta Rojo
-* LowH  = 000/179
-* HighH = 077/179
-* LowS  = 43/255
-* HighS = 229/255
-* LowV  = 0/255
+* LowH  = 160/179
+* HighH = 179/179
+* LowS  = 100/255
+* HighS = 255/255
+* LowV  = 100/255
 * HighV = 255/255
 */
     iLowH = 160;
     iHighH = 179;
-    iLowS = 100;
+    iLowS = 0;
     iHighS = 255;
-    iLowV = 100;
+    iLowV = 0;
     iHighV = 255;
 
-    colorFilter(originalImage);
+    //calibrateColorDetection();
+    ColorFilter(originalImage);
+
     return areaColorDetection;
 }
 
@@ -229,18 +310,19 @@ int NaoVision::getAreaYellowColor(Mat originalImage) {
 * HighV = 255/255
 */
     iLowH = 20;
-    iHighH = 71;
-    iLowS = 169;
+    iHighH = 100;
+    iLowS = 80;
     iHighS = 255;
     iLowV = 141;
     iHighV = 255;
 
-    colorFilter(originalImage);
+    ColorFilter(originalImage);
+
     return areaColorDetection;
 }
 
 // Adds a filter with the parameters preconfigured and calculates the area obtained for a certain preselected color.
-void NaoVision::colorFilter(Mat originalImage) {
+void NaoVision::ColorFilter(Mat originalImage) {
     Mat src_gray;
     Mat imgHSV;
     Mat imgThresholded;
@@ -255,6 +337,7 @@ void NaoVision::colorFilter(Mat originalImage) {
     // Morphological closing (fill small holes in the foreground).
     dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
     erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+    //drawContours(imgThresholded,contours,1,theObjects.at(i).getColor(),3,8,hierarchy);
 
     // Get the moments.
     Moments oMoments = moments(imgThresholded);
@@ -265,29 +348,28 @@ void NaoVision::colorFilter(Mat originalImage) {
 
     // Cloned the modified image to calculate the points.
     src_gray = imgThresholded.clone();
-
-    if (!local) {
+    if(!local){
         imshow("Thresholded Image", imgThresholded);      // Show the thresholded image.
         imshow("Original", originalImage);                // Show the original image.
     }
-
     // Blur to soften the image points.
     blur(src_gray, src_gray, Size(3,3));
+    //cout <<area << endl;
+    //if(area>=1 && area<=20)
+        //return true;    // Green area detected.
 }
 
 // Method that allows us to find the values for the detection of a certain color.
 void NaoVision::calibrateColorDetection() {
-    if (!local) {
-        namedWindow("Control", CV_WINDOW_AUTOSIZE);         // Create a window called "Control".
+    namedWindow("Control", CV_WINDOW_AUTOSIZE);         // Create a window called "Control".
 
-        // Create trackbars in "Control" window.
-        cvCreateTrackbar("LowH" , "Control", &iLowH, 179);   // Hue (0 - 179).
-        cvCreateTrackbar("HighH", "Control", &iHighH, 179);
-        cvCreateTrackbar("LowS" , "Control", &iLowS, 255);   // Saturation (0 - 255).
-        cvCreateTrackbar("HighS", "Control", &iHighS, 255);
-        cvCreateTrackbar("LowV" , "Control", &iLowV, 255);   // Value (0 - 255).
-        cvCreateTrackbar("HighV", "Control", &iHighV, 255);
-    }
+    // Create trackbars in "Control" window.
+    cvCreateTrackbar("LowH" , "Control", &iLowH, 179);   // Hue (0 - 179).
+    cvCreateTrackbar("HighH", "Control", &iHighH, 179);
+    cvCreateTrackbar("LowS" , "Control", &iLowS, 255);   // Saturation (0 - 255).
+    cvCreateTrackbar("HighS", "Control", &iHighS, 255);
+    cvCreateTrackbar("LowV" , "Control", &iLowV, 255);   // Value (0 - 255).
+    cvCreateTrackbar("HighV", "Control", &iHighV, 255);
 }
 
 // Calculate the angle in degrees of a certain line.

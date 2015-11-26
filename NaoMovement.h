@@ -12,10 +12,20 @@ public:
     enum NaoPositionOnLane {LEFT, CENTER, RIGHT};
 
     NaoMovement(const string ip, const int port, bool local);
+    NaoMovement(bool local);
+
     void initialPositionIndividualRace();
     void initialPositionRelayRace();
     void moveInIndividualRace(double angleInDegrees);
+
+    void moveInRelayRace(double angleInDegrees);
     void naoOnGoal();
+    bool naoOnGoalRelayRace(double angleInDegrees);
+
+    void leftCorrection();
+    void middleCorrection();
+    void rightCorrection();
+
     void stop();
 
 private:
@@ -27,7 +37,12 @@ private:
     int port;
     string ip;
 
-    double linearVelocity(double theta);
-    double angularVelocity(double theta);
-    AL::ALValue walkParameters();
+    double linearVelocityIndividualRace(double theta);
+    double angularVelocityIndividualRace(double theta);
+    double lateralVelocity(double theta);
+    double linearVelocityRelayRace(double theta);
+    double angularVelocityRelayRace(double theta);
+    AL::ALValue walkingParametersIndividualRace();
+    AL::ALValue walkingParametersRelayRace();
+    AL::ALValue walkingParametersOnGoalRelayRace();
 };
